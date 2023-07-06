@@ -1,7 +1,5 @@
-'use strict'
-
-var cities = require('all-the-cities')
-var sphereKnn = require('sphere-knn')
+import cities from 'all-the-cities'
+import sphereKnn from 'sphere-knn'
 
 console.log('=== sphere-knn benchmark ===')
 

@@ -1,7 +1,7 @@
 'use strict'
 
-var cities = require('all-the-cities')
-var VPTreeFactory = require('vptree')
+import cities from 'all-the-cities'
+import VPTreeFactory from 'vptree'
 
 console.log('=== vptree.js benchmark ===')
 

@@ -1,6 +1,6 @@
 'use strict'
 
-var cities = require('all-the-cities')
+import cities from 'all-the-cities'
 
 console.log('=== naive benchmark ===')
 

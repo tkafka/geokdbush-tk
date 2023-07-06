@@ -39,5 +39,5 @@ geokdbush.around(index, -119.7051, 34.4363)
 console.timeEnd(`query all ${n}`)
 
 console.time(`${k} random queries of 1 closest`)
-for (i = 0; i < k; i++) geokdbush.around(index, randomPoints[i].lon, randomPoints[i].lat, 1)
+for (let i = 0; i < k; i++) geokdbush.around(index, randomPoints[i].lon, randomPoints[i].lat, 1)
 console.timeEnd(`${k} random queries of 1 closest`)
