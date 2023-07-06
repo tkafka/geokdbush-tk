@@ -7,8 +7,7 @@ It implements fast [nearest neighbors](https://en.wikipedia.org/wiki/Nearest_nei
 for locations on Earth, taking Earth curvature and date line wrapping into account.
 Inspired by [sphere-knn](https://github.com/darkskyapp/sphere-knn), but uses a different algorithm.
 
-BEWARE - THIS FORK DOESN'T WORK PROPERLY - GEOKDBUSH IS DEPENDENT ON KDBUSH INTERNAL INDEX, AND SOMETHING SEEMS TO HAVE CHANGED?
-This fork is intended to work with `kdbush 4.x`, which doesn't store the whole objects, but only ids, so you have to keep the id to object lookup by yourself.
+This works with `kdbush 4.x`, which doesn't store the whole objects, but only ids, so you have to keep the id-to-object lookup by yourself, and the `.around` method returns just ids.
 
 ### Example
 
@@ -50,7 +49,7 @@ Returns an array of the closest ids (indices) of points from a given location in
 - `latitude`: query point latitude.
 - `maxResults`: (optional) maximum number of points to return (`Infinity` by default).
 - `maxDistance`: (optional) maximum distance in kilometers to search within (`Infinity` by default).
-- `filterFn`: (optional) a function to filter the results with.
+- `filterFn`: (optional) a function to filter the results (ids) with.
 
 #### geokdbush.distance(longitude1, latitude1, longitude2, latitude2)
 
