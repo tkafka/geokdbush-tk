@@ -1,5 +1,4 @@
 import TinyQueue from 'tinyqueue'
-import { strict as assert } from 'node:assert'
 
 const earthRadius = 6371
 const rad = Math.PI / 180
@@ -32,8 +31,6 @@ export function around(index, lng, lat, maxResults, maxDistance, predicate) {
 		const right = node.right
 		const left = node.left
 
-		assert(right >= left, `Node broken: ${left} -> ${right}`)
-
 		if (right - left <= index.nodeSize) {
 			// leaf node
 
@@ -53,8 +50,6 @@ export function around(index, lng, lat, maxResults, maxDistance, predicate) {
 			const mid = (left + right) >> 1 // middle index
 			const midLng = index.coords[2 * mid]
 			const midLat = index.coords[2 * mid + 1]
-
-			assert(typeof mid === 'number', `Mid must be an index, is ${mid}`)
 
 			// add middle point to the queue
 			const itemId = index.ids[mid]
@@ -78,7 +73,6 @@ export function around(index, lng, lat, maxResults, maxDistance, predicate) {
 				maxLat: node.axis === 1 ? midLat : node.maxLat,
 				dist: 0,
 			}
-			assert(mid - 1 > left, `Left node broken: ${left} -> ${mid - 1}`)
 
 			// second half of the node
 			const rightNode = {
@@ -91,7 +85,6 @@ export function around(index, lng, lat, maxResults, maxDistance, predicate) {
 				maxLat: node.maxLat,
 				dist: 0,
 			}
-			assert(right >= mid + 1, `Right node broken: ${mid + 1} -> ${right}`)
 
 			leftNode.dist = boxDist(lng, lat, cosLat, leftNode)
 			rightNode.dist = boxDist(lng, lat, cosLat, rightNode)
@@ -107,7 +100,6 @@ export function around(index, lng, lat, maxResults, maxDistance, predicate) {
 			if (candidate.dist > maxHaverSinDist) return result
 			result.push(candidate.item)
 			if (result.length === maxResults) return result
-			console.log(`${result.length} results, ${q.length} in queue`, candidate.item)
 		}
 
 		// the next closest kd-tree node
