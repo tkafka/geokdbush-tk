@@ -13,7 +13,7 @@ This fork works with `kdbush 4.x`, which doesn't store the whole objects, but on
 
 ```js
 import KDBush from 'kdbush'
-import geokdbush from 'geokdbush'
+import * as geokdbush from 'geokdbush'
 
 // create a point array
 const points = [
