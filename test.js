@@ -45,7 +45,6 @@ test('performs search using filter function', function (t) {
 
 const minPop = 0
 test(`performs exhaustive search in correct order for cities with population above ${minPop}`, function (t) {
-	/// if we consider all cities, we run out of RAM
 	const pointIds = geokdbush.around(index, 30.5, 50.5, Infinity, Infinity, (id) => cities[id].population >= minPop)
 
 	const origin = { lon: 30.5, lat: 50.5 }
