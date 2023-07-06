@@ -4,6 +4,7 @@
   "main": "index.js",
   "author": "Tomas Kafka <tk@tomaskafka.com> - original by Vladimir Agafonkin <agafonkin@gmail.com>",
   "license": "ISC",
+  "type": "module",
   "dependencies": {
     "tinyqueue": "^2.0.3"
   },
@@ -13,19 +14,13 @@
   },
   "devDependencies": {
     "all-the-cities": "3.1.0",
-    "eslint": "^8.44.0",
-    "eslint-config-mourner": "^3.0.0",
     "kdbush": "^4.0.2",
     "prettier": "^3.0.0",
     "sphere-knn": "^1.4.0",
     "tape": "^5.6.4",
     "vptree": "^1.0.0"
   },
-  "eslintConfig": {
-    "extends": "mourner"
-  },
   "scripts": {
-    "pretest": "eslint index.js test.js bench",
     "test": "tape test.js",
     "bench": "cd bench && node bench-geokdbush && node bench-sphere-knn && node bench-naive && node bench-vptree",
     "prettier-format": "prettier --write '**/*.(js|ts|cjs|jsx|tsx|json|less|scss|pug)'",

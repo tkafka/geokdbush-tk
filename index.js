@@ -1,173 +1,167 @@
-'use strict';
+import TinyQueue from 'tinyqueue'
 
-var TinyQueue = require('tinyqueue');
+const earthRadius = 6371
+const rad = Math.PI / 180
 
-exports.around = around;
-exports.distance = distance;
+export function around(index, lng, lat, maxResults, maxDistance, predicate) {
+	const maxHaverSinDist = 1
+	const result = []
 
-var earthRadius = 6371;
-var rad = Math.PI / 180;
+	if (maxResults === undefined) maxResults = Infinity
+	if (maxDistance !== undefined) maxHaverSinDist = haverSin(maxDistance / earthRadius)
 
-function around(index, lng, lat, maxResults, maxDistance, predicate) {
-    var maxHaverSinDist = 1, result = [];
+	// a distance-sorted priority queue that will contain both points and kd-tree nodes
+	var q = new TinyQueue([], compareDist)
 
-    if (maxResults === undefined) maxResults = Infinity;
-    if (maxDistance !== undefined) maxHaverSinDist = haverSin(maxDistance / earthRadius);
+	// an object that represents the top kd-tree node (the whole Earth)
+	var node = {
+		left: 0, // left index in the kd-tree array
+		right: index.ids.length - 1, // right index
+		axis: 0, // 0 for longitude axis and 1 for latitude axis
+		dist: 0, // will hold the lower bound of children's distances to the query point
+		minLng: -180, // bounding box of the node
+		minLat: -90,
+		maxLng: 180,
+		maxLat: 90,
+	}
 
-    // a distance-sorted priority queue that will contain both points and kd-tree nodes
-    var q = new TinyQueue([], compareDist);
+	var cosLat = Math.cos(lat * rad)
 
-    // an object that represents the top kd-tree node (the whole Earth)
-    var node = {
-        left: 0, // left index in the kd-tree array
-        right: index.ids.length - 1, // right index
-        axis: 0, // 0 for longitude axis and 1 for latitude axis
-        dist: 0, // will hold the lower bound of children's distances to the query point
-        minLng: -180, // bounding box of the node
-        minLat: -90,
-        maxLng: 180,
-        maxLat: 90
-    };
+	while (node) {
+		var right = node.right
+		var left = node.left
 
-    var cosLat = Math.cos(lat * rad);
+		if (right - left <= index.nodeSize) {
+			// leaf node
 
-    while (node) {
-        var right = node.right;
-        var left = node.left;
+			// add all points of the leaf node to the queue
+			for (var i = left; i <= right; i++) {
+				var item = index.points[index.ids[i]]
+				if (!predicate || predicate(item)) {
+					q.push({
+						item: item,
+						dist: haverSinDist(lng, lat, index.coords[2 * i], index.coords[2 * i + 1], cosLat),
+					})
+				}
+			}
+		} else {
+			// not a leaf node (has child nodes)
 
-        if (right - left <= index.nodeSize) { // leaf node
+			var m = (left + right) >> 1 // middle index
+			var midLng = index.coords[2 * m]
+			var midLat = index.coords[2 * m + 1]
 
-            // add all points of the leaf node to the queue
-            for (var i = left; i <= right; i++) {
-                var item = index.points[index.ids[i]];
-                if (!predicate || predicate(item)) {
-                    q.push({
-                        item: item,
-                        dist: haverSinDist(lng, lat, index.coords[2 * i], index.coords[2 * i + 1], cosLat)
-                    });
-                }
-            }
+			// add middle point to the queue
+			item = index.points[index.ids[m]]
+			if (!predicate || predicate(item)) {
+				q.push({
+					item: item,
+					dist: haverSinDist(lng, lat, midLng, midLat, cosLat),
+				})
+			}
 
-        } else { // not a leaf node (has child nodes)
+			var nextAxis = (node.axis + 1) % 2
 
-            var m = (left + right) >> 1; // middle index
-            var midLng = index.coords[2 * m];
-            var midLat = index.coords[2 * m + 1];
+			// first half of the node
+			var leftNode = {
+				left: left,
+				right: m - 1,
+				axis: nextAxis,
+				minLng: node.minLng,
+				minLat: node.minLat,
+				maxLng: node.axis === 0 ? midLng : node.maxLng,
+				maxLat: node.axis === 1 ? midLat : node.maxLat,
+				dist: 0,
+			}
+			// second half of the node
+			var rightNode = {
+				left: m + 1,
+				right: right,
+				axis: nextAxis,
+				minLng: node.axis === 0 ? midLng : node.minLng,
+				minLat: node.axis === 1 ? midLat : node.minLat,
+				maxLng: node.maxLng,
+				maxLat: node.maxLat,
+				dist: 0,
+			}
 
-            // add middle point to the queue
-            item = index.points[index.ids[m]];
-            if (!predicate || predicate(item)) {
-                q.push({
-                    item: item,
-                    dist: haverSinDist(lng, lat, midLng, midLat, cosLat)
-                });
-            }
+			leftNode.dist = boxDist(lng, lat, cosLat, leftNode)
+			rightNode.dist = boxDist(lng, lat, cosLat, rightNode)
 
-            var nextAxis = (node.axis + 1) % 2;
+			// add child nodes to the queue
+			q.push(leftNode)
+			q.push(rightNode)
+		}
 
-            // first half of the node
-            var leftNode = {
-                left: left,
-                right: m - 1,
-                axis: nextAxis,
-                minLng: node.minLng,
-                minLat: node.minLat,
-                maxLng: node.axis === 0 ? midLng : node.maxLng,
-                maxLat: node.axis === 1 ? midLat : node.maxLat,
-                dist: 0
-            };
-            // second half of the node
-            var rightNode = {
-                left: m + 1,
-                right: right,
-                axis: nextAxis,
-                minLng: node.axis === 0 ? midLng : node.minLng,
-                minLat: node.axis === 1 ? midLat : node.minLat,
-                maxLng: node.maxLng,
-                maxLat: node.maxLat,
-                dist: 0
-            };
+		// fetch closest points from the queue; they're guaranteed to be closer
+		// than all remaining points (both individual and those in kd-tree nodes),
+		// since each node's distance is a lower bound of distances to its children
+		while (q.length && q.peek().item) {
+			var candidate = q.pop()
+			if (candidate.dist > maxHaverSinDist) return result
+			result.push(candidate.item)
+			if (result.length === maxResults) return result
+		}
 
-            leftNode.dist = boxDist(lng, lat, cosLat, leftNode);
-            rightNode.dist = boxDist(lng, lat, cosLat, rightNode);
+		// the next closest kd-tree node
+		node = q.pop()
+	}
 
-            // add child nodes to the queue
-            q.push(leftNode);
-            q.push(rightNode);
-        }
-
-        // fetch closest points from the queue; they're guaranteed to be closer
-        // than all remaining points (both individual and those in kd-tree nodes),
-        // since each node's distance is a lower bound of distances to its children
-        while (q.length && q.peek().item) {
-            var candidate = q.pop();
-            if (candidate.dist > maxHaverSinDist) return result;
-            result.push(candidate.item);
-            if (result.length === maxResults) return result;
-        }
-
-        // the next closest kd-tree node
-        node = q.pop();
-    }
-
-    return result;
+	return result
 }
 
 // lower bound for distance from a location to points inside a bounding box
 function boxDist(lng, lat, cosLat, node) {
-    var minLng = node.minLng;
-    var maxLng = node.maxLng;
-    var minLat = node.minLat;
-    var maxLat = node.maxLat;
+	var minLng = node.minLng
+	var maxLng = node.maxLng
+	var minLat = node.minLat
+	var maxLat = node.maxLat
 
-    // query point is between minimum and maximum longitudes
-    if (lng >= minLng && lng <= maxLng) {
-        if (lat < minLat) return haverSin((lat - minLat) * rad);
-        if (lat > maxLat) return haverSin((lat - maxLat) * rad);
-        return 0;
-    }
+	// query point is between minimum and maximum longitudes
+	if (lng >= minLng && lng <= maxLng) {
+		if (lat < minLat) return haverSin((lat - minLat) * rad)
+		if (lat > maxLat) return haverSin((lat - maxLat) * rad)
+		return 0
+	}
 
-    // query point is west or east of the bounding box;
-    // calculate the extremum for great circle distance from query point to the closest longitude;
-    var haverSinDLng = Math.min(haverSin((lng - minLng) * rad), haverSin((lng - maxLng) * rad));
-    var extremumLat = vertexLat(lat, haverSinDLng);
+	// query point is west or east of the bounding box;
+	// calculate the extremum for great circle distance from query point to the closest longitude;
+	var haverSinDLng = Math.min(haverSin((lng - minLng) * rad), haverSin((lng - maxLng) * rad))
+	var extremumLat = vertexLat(lat, haverSinDLng)
 
-    // if extremum is inside the box, return the distance to it
-    if (extremumLat > minLat && extremumLat < maxLat) {
-        return haverSinDistPartial(haverSinDLng, cosLat, lat, extremumLat);
-    }
-    // otherwise return the distan e to one of the bbox corners (whichever is closest)
-    return Math.min(
-        haverSinDistPartial(haverSinDLng, cosLat, lat, minLat),
-        haverSinDistPartial(haverSinDLng, cosLat, lat, maxLat)
-    );
+	// if extremum is inside the box, return the distance to it
+	if (extremumLat > minLat && extremumLat < maxLat) {
+		return haverSinDistPartial(haverSinDLng, cosLat, lat, extremumLat)
+	}
+	// otherwise return the distan e to one of the bbox corners (whichever is closest)
+	return Math.min(haverSinDistPartial(haverSinDLng, cosLat, lat, minLat), haverSinDistPartial(haverSinDLng, cosLat, lat, maxLat))
 }
 
 function compareDist(a, b) {
-    return a.dist - b.dist;
+	return a.dist - b.dist
 }
 
 function haverSin(theta) {
-    var s = Math.sin(theta / 2);
-    return s * s;
+	var s = Math.sin(theta / 2)
+	return s * s
 }
 
 function haverSinDistPartial(haverSinDLng, cosLat1, lat1, lat2) {
-    return cosLat1 * Math.cos(lat2 * rad) * haverSinDLng + haverSin((lat1 - lat2) * rad);
+	return cosLat1 * Math.cos(lat2 * rad) * haverSinDLng + haverSin((lat1 - lat2) * rad)
 }
 
 function haverSinDist(lng1, lat1, lng2, lat2, cosLat1) {
-    var haverSinDLng = haverSin((lng1 - lng2) * rad);
-    return haverSinDistPartial(haverSinDLng, cosLat1, lat1, lat2);
+	var haverSinDLng = haverSin((lng1 - lng2) * rad)
+	return haverSinDistPartial(haverSinDLng, cosLat1, lat1, lat2)
 }
 
-function distance(lng1, lat1, lng2, lat2) {
-    var h = haverSinDist(lng1, lat1, lng2, lat2, Math.cos(lat1 * rad));
-    return 2 * earthRadius * Math.asin(Math.sqrt(h));
+export function distance(lng1, lat1, lng2, lat2) {
+	var h = haverSinDist(lng1, lat1, lng2, lat2, Math.cos(lat1 * rad))
+	return 2 * earthRadius * Math.asin(Math.sqrt(h))
 }
 
 function vertexLat(lat, haverSinDLng) {
-    var cosDLng = 1 - 2 * haverSinDLng;
-    if (cosDLng <= 0) return lat > 0 ? 90 : -90;
-    return Math.atan(Math.tan(lat * rad) / cosDLng) / rad;
+	var cosDLng = 1 - 2 * haverSinDLng
+	if (cosDLng <= 0) return lat > 0 ? 90 : -90
+	return Math.atan(Math.tan(lat * rad) / cosDLng) / rad
 }
