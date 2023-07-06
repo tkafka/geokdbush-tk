@@ -14,7 +14,7 @@ export function around(index, lng, lat, maxResults, maxDistance, predicate) {
 	const q = new TinyQueue([], compareDist)
 
 	// an object that represents the top kd-tree node (the whole Earth)
-	const node = {
+	let node = {
 		left: 0, // left index in the kd-tree array
 		right: index.ids.length - 1, // right index
 		axis: 0, // 0 for longitude axis and 1 for latitude axis
@@ -35,7 +35,7 @@ export function around(index, lng, lat, maxResults, maxDistance, predicate) {
 			// leaf node
 
 			// add all points of the leaf node to the queue
-			for (const i = left; i <= right; i++) {
+			for (var i = left; i <= right; i++) {
 				const itemId = index.ids[i]
 				if (!predicate || predicate(itemId)) {
 					q.push({
@@ -101,6 +101,7 @@ export function around(index, lng, lat, maxResults, maxDistance, predicate) {
 			if (candidate.dist > maxHaverSinDist) return result
 			result.push(candidate.item)
 			if (result.length === maxResults) return result
+			console.log(`${result.length} results, ${q.length} in queue`, candidate.item)
 		}
 
 		// the next closest kd-tree node

@@ -1,8 +1,8 @@
 'use strict'
 
 import { test } from 'tape'
-import KDBush from 'kdbush'
 import cities from 'all-the-cities'
+import KDBush from 'kdbush'
 import * as geokdbush from './index.js'
 
 // create
@@ -54,7 +54,7 @@ test(`performs exhaustive search in correct order for cities with population abo
 		.map((city) => ({ name: city.name, dist: geokdbush.distance(origin.lon, origin.lat, city.loc.coordinates[0], city.loc.coordinates[1]) }))
 		.sort((a, b) => a.dist - b.dist)
 
-	for (const i = 0; i < sorted.length; i++) {
+	for (var i = 0; i < sorted.length; i++) {
 		let pointCity = cities[pointIds[i]]
 		const dist = geokdbush.distance(pointCity.loc.coordinates[0], pointCity.loc.coordinates[1], origin.lon, origin.lat)
 		if (dist !== sorted[i].dist) {
