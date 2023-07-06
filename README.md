@@ -7,7 +7,7 @@ It implements fast [nearest neighbors](https://en.wikipedia.org/wiki/Nearest_nei
 for locations on Earth, taking Earth curvature and date line wrapping into account.
 Inspired by [sphere-knn](https://github.com/darkskyapp/sphere-knn), but uses a different algorithm.
 
-This works with `kdbush 4.x`, which doesn't store the whole objects, but only ids, so you have to keep the id-to-object lookup by yourself, and the `.around` method returns just ids.
+This fork works with `kdbush 4.x`, which doesn't store the whole objects, but only ids, so you have to keep the id-to-object lookup by yourself, and the `.around` method returns just ids.
 
 ### Example
 
