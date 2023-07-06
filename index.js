@@ -38,7 +38,7 @@ export function around(index, lng, lat, maxResults, maxDistance, predicate) {
 			// leaf node
 
 			// add all points of the leaf node to the queue
-			for (var i = left; i <= right; i++) {
+			for (let i = left; i <= right; i++) {
 				const itemId = index.ids[i]
 				if (!predicate || predicate(itemId)) {
 					q.push({
