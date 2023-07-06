@@ -104,7 +104,10 @@ export function around(index, lng, lat, maxResults, maxDistance, predicate) {
 		// fetch closest points from the queue; they're guaranteed to be closer
 		// than all remaining points (both individual and those in kd-tree nodes),
 		// since each node's distance is a lower bound of distances to its children
-		while (q.length && q.peek().item) {
+
+		// this also removes all items, so only nodes should be left
+		// however, it assumes the items are all on top of the queue
+		while (q.length && typeof q.peek().item !== 'undefined') {
 			const candidate = q.pop()
 			if (candidate.dist > maxHaverSinDist) return result
 			result.push(candidate.item)
