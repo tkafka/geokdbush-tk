@@ -7,7 +7,8 @@ It implements fast [nearest neighbors](https://en.wikipedia.org/wiki/Nearest_nei
 for locations on Earth, taking Earth curvature and date line wrapping into account.
 Inspired by [sphere-knn](https://github.com/darkskyapp/sphere-knn), but uses a different algorithm.
 
-This fork works with `kdbush 4.x`, which doesn't store the whole objects, but only ids, so you have to keep the id to object lookup by yourself.
+BEWARE - THIS FORK DOESN'T WORK PROPERLY - GEOKDBUSH IS DEPENDENT ON KDBUSH INTERNAL INDEX, AND SOMETHING SEEMS TO HAVE CHANGED?
+This fork is intended to work with `kdbush 4.x`, which doesn't store the whole objects, but only ids, so you have to keep the id to object lookup by yourself.
 
 ### Example
 
