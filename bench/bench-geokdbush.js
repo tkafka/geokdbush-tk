@@ -1,27 +1,29 @@
 'use strict'
 
-var cities = require('all-the-cities')
-var kdbush = require('kdbush')
-var geokdbush = require('../')
+import cities from 'all-the-cities'
+import KDBush from 'kdbush'
+import * as geokdbush from '../index.js'
 
 console.log('=== geokdbush benchmark ===')
 
-var n = cities.length
-var k = 1000
+const n = cities.length
+const k = 1000
 
-var randomPoints = []
-for (var i = 0; i < k; i++)
+const randomPoints = []
+for (let i = 0; i < k; i++)
 	randomPoints.push({
 		lon: -180 + 360 * Math.random(),
 		lat: -60 + 140 * Math.random(),
 	})
 
 console.time(`index ${n} points`)
-var index = kdbush(
-	cities,
-	(p) => p.lon,
-	(p) => p.lat,
-)
+
+const index = new KDBush(cities.length)
+for (const city of cities) {
+	index.add(city.loc.coordinates[0], city.loc.coordinates[1])
+}
+index.finish()
+
 console.timeEnd(`index ${n} points`)
 
 console.time('query 1000 closest')
