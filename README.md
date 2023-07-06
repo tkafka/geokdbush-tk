@@ -7,22 +7,42 @@ It implements fast [nearest neighbors](https://en.wikipedia.org/wiki/Nearest_nei
 for locations on Earth, taking Earth curvature and date line wrapping into account.
 Inspired by [sphere-knn](https://github.com/darkskyapp/sphere-knn), but uses a different algorithm.
 
+This fork works with `kdbush 4.x`, which doesn't store the whole objects, but only ids, so you have to keep the id to object lookup by yourself.
+
 ### Example
 
 ```js
-var kdbush = require('kdbush');
-var geokdbush = require('geokdbush');
+import KDBush from 'kdbush'
+import geokdbush from 'geokdbush'
 
-var index = kdbush(points, (p) => p.lon, (p) => p.lat);
+// create a point array
+const points = [
+	{ lat: 12.345, lon: 123.456 } // , ...
+]
 
-var nearest = geokdbush.around(index, -119.7051, 34.4363, 1000);
+// create kdbush index of given length
+let index = new KDBush(points.length)
+
+// add locations
+for (const point of points) {
+	index.add(point.lon, point.lat)
+}
+
+// perform the indexing
+index.finish()
+
+// look up ids ...
+const nearestIds = geokdbush.around(index, -119.7051, 34.4363, 1000)
+
+// ... and optionally convert to points
+const nearestPoints = nearestIds.map((id) => points[id])
 ```
 
 ### API
 
 #### geokdbush.around(index, longitude, latitude[, maxResults, maxDistance, filterFn])
 
-Returns an array of the closest points from a given location in order of increasing distance.
+Returns an array of the closest ids (indices) of points from a given location in order of increasing distance.
 
 - `index`: [kdbush](https://github.com/mourner/kdbush) index.
 - `longitude`: query point longitude.

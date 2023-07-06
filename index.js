@@ -4,7 +4,7 @@ const earthRadius = 6371
 const rad = Math.PI / 180
 
 export function around(index, lng, lat, maxResults, maxDistance, predicate) {
-	const maxHaverSinDist = 1
+	let maxHaverSinDist = 1
 	const result = []
 
 	if (maxResults === undefined) maxResults = Infinity
@@ -36,7 +36,7 @@ export function around(index, lng, lat, maxResults, maxDistance, predicate) {
 
 			// add all points of the leaf node to the queue
 			for (var i = left; i <= right; i++) {
-				var item = index.points[index.ids[i]]
+				var item = index.ids[i]
 				if (!predicate || predicate(item)) {
 					q.push({
 						item: item,
@@ -52,7 +52,7 @@ export function around(index, lng, lat, maxResults, maxDistance, predicate) {
 			var midLat = index.coords[2 * m + 1]
 
 			// add middle point to the queue
-			item = index.points[index.ids[m]]
+			item = index.ids[m]
 			if (!predicate || predicate(item)) {
 				q.push({
 					item: item,
