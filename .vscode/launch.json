@@ -10,6 +10,13 @@
 			"name": "Test",
 			"skipFiles": ["<node_internals>/**"],
 			"program": "${workspaceFolder}/test.js"
+		},
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Bench",
+			"skipFiles": ["<node_internals>/**"],
+			"program": "${workspaceFolder}/bench/bench-geokdbush.js"
 		}
 	]
 }
