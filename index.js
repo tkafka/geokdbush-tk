@@ -1,4 +1,5 @@
 import TinyQueue from 'tinyqueue'
+import { strict as assert } from 'node:assert'
 
 const earthRadius = 6371
 const rad = Math.PI / 180
@@ -31,6 +32,8 @@ export function around(index, lng, lat, maxResults, maxDistance, predicate) {
 		const right = node.right
 		const left = node.left
 
+		assert(right >= left, `Node broken: ${left} -> ${right}`)
+
 		if (right - left <= index.nodeSize) {
 			// leaf node
 
@@ -47,12 +50,14 @@ export function around(index, lng, lat, maxResults, maxDistance, predicate) {
 		} else {
 			// not a leaf node (has child nodes)
 
-			const m = (left + right) >> 1 // middle index
-			const midLng = index.coords[2 * m]
-			const midLat = index.coords[2 * m + 1]
+			const mid = (left + right) >> 1 // middle index
+			const midLng = index.coords[2 * mid]
+			const midLat = index.coords[2 * mid + 1]
+
+			assert(typeof mid === 'number', `Mid must be an index, is ${mid}`)
 
 			// add middle point to the queue
-			const itemId = index.ids[m]
+			const itemId = index.ids[mid]
 			if (!predicate || predicate(itemId)) {
 				q.push({
 					item: itemId,
@@ -65,7 +70,7 @@ export function around(index, lng, lat, maxResults, maxDistance, predicate) {
 			// first half of the node
 			const leftNode = {
 				left: left,
-				right: m - 1,
+				right: mid - 1,
 				axis: nextAxis,
 				minLng: node.minLng,
 				minLat: node.minLat,
@@ -73,9 +78,11 @@ export function around(index, lng, lat, maxResults, maxDistance, predicate) {
 				maxLat: node.axis === 1 ? midLat : node.maxLat,
 				dist: 0,
 			}
+			assert(mid - 1 > left, `Left node broken: ${left} -> ${mid - 1}`)
+
 			// second half of the node
 			const rightNode = {
-				left: m + 1,
+				left: mid + 1,
 				right: right,
 				axis: nextAxis,
 				minLng: node.axis === 0 ? midLng : node.minLng,
@@ -84,6 +91,7 @@ export function around(index, lng, lat, maxResults, maxDistance, predicate) {
 				maxLat: node.maxLat,
 				dist: 0,
 			}
+			assert(right >= mid + 1, `Right node broken: ${mid + 1} -> ${right}`)
 
 			leftNode.dist = boxDist(lng, lat, cosLat, leftNode)
 			rightNode.dist = boxDist(lng, lat, cosLat, rightNode)
