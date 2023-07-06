@@ -17,7 +17,7 @@ for (const city of cities) {
 index.finish()
 
 test('performs search according to maxResults', function (t) {
-	var pointIds = geokdbush.around(index, -119.7051, 34.4363, 5)
+	const pointIds = geokdbush.around(index, -119.7051, 34.4363, 5)
 
 	t.same(pointIds.map((id) => cities[id].name).join(', '), 'Mission Canyon, Santa Barbara, Montecito, Summerland, Goleta')
 
@@ -25,7 +25,7 @@ test('performs search according to maxResults', function (t) {
 })
 
 test('performs search within maxDistance', function (t) {
-	var pointIds = geokdbush.around(index, 30.5, 50.5, Infinity, 20)
+	const pointIds = geokdbush.around(index, 30.5, 50.5, Infinity, 20)
 
 	t.same(
 		pointIds.map((id) => cities[id].name).join(', '),
@@ -36,7 +36,7 @@ test('performs search within maxDistance', function (t) {
 })
 
 test('performs search using filter function', function (t) {
-	var pointIds = geokdbush.around(index, 30.5, 50.5, 10, Infinity, (id) => cities[id].population > 1000000)
+	const pointIds = geokdbush.around(index, 30.5, 50.5, 10, Infinity, (id) => cities[id].population > 1000000)
 
 	t.same(pointIds.map((id) => cities[id].name).join(', '), 'Kyiv, Dnipro, Kharkiv, Minsk, Odessa, Donetsk, Warsaw, Bucharest, Moscow, Rostov-na-Donu')
 
@@ -46,17 +46,17 @@ test('performs search using filter function', function (t) {
 const minPop = 100000
 test(`performs exhaustive search in correct order for cities with population above ${minPop}`, function (t) {
 	/// if we consider all cities, we run out of RAM
-	var pointIds = geokdbush.around(index, 30.5, 50.5, Infinity, Infinity, (id) => cities[id].population >= minPop)
+	const pointIds = geokdbush.around(index, 30.5, 50.5, Infinity, Infinity, (id) => cities[id].population >= minPop)
 
-	var origin = { lon: 30.5, lat: 50.5 }
-	var sorted = cities
+	const origin = { lon: 30.5, lat: 50.5 }
+	const sorted = cities
 		.filter((city) => city.population >= minPop)
 		.map((city) => ({ name: city.name, dist: geokdbush.distance(origin.lon, origin.lat, city.loc.coordinates[0], city.loc.coordinates[1]) }))
 		.sort((a, b) => a.dist - b.dist)
 
-	for (var i = 0; i < sorted.length; i++) {
+	for (const i = 0; i < sorted.length; i++) {
 		let pointCity = cities[pointIds[i]]
-		var dist = geokdbush.distance(pointCity.loc.coordinates[0], pointCity.loc.coordinates[1], origin.lon, origin.lat)
+		const dist = geokdbush.distance(pointCity.loc.coordinates[0], pointCity.loc.coordinates[1], origin.lon, origin.lat)
 		if (dist !== sorted[i].dist) {
 			t.fail(`${pointCity.name} vs ${sorted[i].name}`)
 			break
