@@ -1,6 +1,6 @@
 {
   "name": "geokdbush-tk",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "main": "index.js",
   "author": "Tomas Kafka <tk@tomaskafka.com> - original by Vladimir Agafonkin <agafonkin@gmail.com>",
   "license": "ISC",
@@ -14,6 +14,7 @@
   },
   "devDependencies": {
     "all-the-cities": "3.1.0",
+    "haversine-distance": "^1.2.1",
     "kdbush": "^4.0.2",
     "prettier": "^3.0.0",
     "sphere-knn": "^1.4.0",
