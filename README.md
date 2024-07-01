@@ -1,3 +1,7 @@
+**Note 1:** This fork works with `kdbush 4.x`, which doesn't store the whole objects, but only ids, so you have to keep the id-to-object lookup by yourself, and the `.around` method returns just ids.
+
+**Note 2:** With [`geokdbush 2.x`](https://github.com/mourner/geokdbush), this module is obsolete, as geokdbush 2.x is updated to work with kdbush 4.x and uses the exact same API as this module (which is no longer updated).
+
 ## geokdbush [![Build Status](https://travis-ci.org/mourner/geokdbush.svg?branch=master)](https://travis-ci.org/mourner/geokdbush)
 
 A geographic extension for [kdbush](https://github.com/mourner/kdbush),
@@ -6,8 +10,6 @@ the fastest static spatial index for points in JavaScript.
 It implements fast [nearest neighbors](https://en.wikipedia.org/wiki/Nearest_neighbor_search) queries
 for locations on Earth, taking Earth curvature and date line wrapping into account.
 Inspired by [sphere-knn](https://github.com/darkskyapp/sphere-knn), but uses a different algorithm.
-
-This fork works with `kdbush 4.x`, which doesn't store the whole objects, but only ids, so you have to keep the id-to-object lookup by yourself, and the `.around` method returns just ids.
 
 ### Example
 
